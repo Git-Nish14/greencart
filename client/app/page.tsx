@@ -4,6 +4,9 @@ import Navbar from "@/components/Navbar";
 import { AppContextProvider } from "@/context/AppContext";
 import Categories from "@/components/Categories";
 import BestSeller from "@/components/BestSeller";
+import BottomBanner from "@/components/BottomBanner";
+import NewsLetter from "@/components/NewsLetter";
+import Footer from "@/components/Footer";
 
 const HomePage = () => {
   return (
@@ -16,7 +19,10 @@ const HomePage = () => {
           <MainBanner />
           <Categories />
           <BestSeller />
+          <BottomBanner />
+          <NewsLetter />
         </div>
+        <Footer />
       </AppContextProvider>
     </main>
   );
