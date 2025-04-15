@@ -29,6 +29,8 @@ interface AppContextType {
   cartItems: CartItemsType;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  getCartCount: () => number;
+  getCartAmount: () => number;
 }
 
 const defaultContext: AppContextType = {
@@ -46,6 +48,8 @@ const defaultContext: AppContextType = {
   cartItems: {},
   searchQuery: "",
   setSearchQuery: () => {},
+  getCartCount: () => 0,
+  getCartAmount: () => 0,
 };
 
 export const AppContext = createContext<AppContextType>(defaultContext);
@@ -91,6 +95,27 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  //get cart item count
+  const getCartCount = () => {
+    let totalCount = 0;
+    for (const item in cartItems) {
+      totalCount += cartItems[item];
+    }
+    return totalCount;
+  };
+
+  //Get cart item total price
+  const getCartAmount = () => {
+    let totalPrice = 0;
+    for (const item in cartItems) {
+      const itemInfo = products.find((product) => product._id === item);
+      if (itemInfo && cartItems[item] > 0) {
+        totalPrice += itemInfo.price * cartItems[item];
+      }
+    }
+    return Math.floor(totalPrice * 100) / 100;
+  };
+
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -110,6 +135,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     cartItems,
     searchQuery,
     setSearchQuery,
+    getCartCount,
+    getCartAmount,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

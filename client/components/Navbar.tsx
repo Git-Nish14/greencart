@@ -9,8 +9,15 @@ import { useRouter } from "next/navigation";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
-  const { user, setUser, setShowUserLogin, setSearchQuery, searchQuery } =
-    useAppContext();
+  const {
+    user,
+    setUser,
+    setShowUserLogin,
+    setSearchQuery,
+    searchQuery,
+    getCartCount,
+    getCartAmount,
+  } = useAppContext();
 
   const router = useRouter();
 
@@ -65,7 +72,7 @@ function Navbar() {
               height={20}
             />
             <span className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full flex items-center justify-center">
-              3
+              {getCartCount()}
             </span>
           </Link>
         </div>
@@ -104,9 +111,24 @@ function Navbar() {
       </div>
 
       {/* Mobile Hamburger Icon */}
-      <button onClick={() => setOpen(!open)} className="sm:hidden">
-        <Image src={assets.menu_icon} alt="menu" width={20} height={20} />
-      </button>
+      <div className="flex items-center gap-6 sm:hidden">
+        <div className="relative">
+          <Link href="/cart">
+            <Image
+              src={assets.nav_cart_icon}
+              alt="cart"
+              width={20}
+              height={20}
+            />
+            <span className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full flex items-center justify-center">
+              {getCartCount()}
+            </span>
+          </Link>
+        </div>
+        <button onClick={() => setOpen(!open)} className="">
+          <Image src={assets.menu_icon} alt="menu" width={20} height={20} />
+        </button>
+      </div>
 
       {/* Mobile Menu */}
       {open && (

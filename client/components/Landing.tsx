@@ -2,13 +2,11 @@
 
 import React from "react";
 import { useAppContext } from "@/context/AppContext";
-import Navbar from "@/components/Navbar";
 import MainBanner from "@/components/MainBanner";
 import Categories from "@/components/Categories";
 import BestSeller from "@/components/BestSeller";
 import BottomBanner from "@/components/BottomBanner";
 import NewsLetter from "@/components/NewsLetter";
-import Footer from "@/components/Footer";
 import Login from "@/components/Login";
 
 export default function ClientHome() {
@@ -16,9 +14,6 @@ export default function ClientHome() {
 
   return (
     <main className="min-h-screen flex flex-col">
-      <header>
-        <Navbar />
-      </header>
       {showUserLogin && <Login />}
       <div className="flex-1 px-4 sm:px-6 md:px-16 lg:px-24 xl:px-32 2xl:px-40">
         <MainBanner />
@@ -27,7 +22,6 @@ export default function ClientHome() {
         <BottomBanner />
         <NewsLetter />
       </div>
-      <Footer />
     </main>
   );
 }

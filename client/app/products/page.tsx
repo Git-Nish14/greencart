@@ -1,7 +1,5 @@
 "use client";
 
-import Footer from "@/components/Footer";
-import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
 import { useAppContext } from "@/context/AppContext";
 import React, { useEffect, useState } from "react";
@@ -24,7 +22,6 @@ function AllProducts() {
 
   return (
     <>
-      <Navbar />
       <div className="mt-16 flex flex-col px-4 sm:px-6 md:px-12 lg:px-20 xl:px-32 2xl:px-40 mb-5">
         <div className="flex flex-col items-end w-full mb-6">
           <p className="text-2xl sm:text-3xl font-semibold uppercase">
@@ -47,7 +44,6 @@ function AllProducts() {
           </p>
         )}
       </div>
-      <Footer />
     </>
   );
 }

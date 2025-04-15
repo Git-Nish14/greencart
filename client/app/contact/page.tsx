@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { toast, Toaster } from "react-hot-toast";
 import { Send, User, Mail, MessageSquare, PhoneCall } from "lucide-react";
-import Navbar from "@/components/Navbar";
 
 const Contact = () => {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
@@ -52,10 +51,6 @@ const Contact = () => {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <Navbar />
-      </div>
-
       {/* Contact Page Content */}
       <div className="min-h-screen bg-gradient-to-b from-green-50 via-white to-green-100 pt-[4.5rem] pb-16">
         {/* Toast Notifications */}

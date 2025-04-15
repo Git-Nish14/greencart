@@ -2,8 +2,6 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useAppContext } from "@/context/AppContext";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import ProductCard from "@/components/ProductCard";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
@@ -40,7 +38,6 @@ const ProductDetailsPage: FC = () => {
   if (!product) {
     return (
       <div className="flex flex-col min-h-screen">
-        <Navbar />
         <div className="flex-1 flex items-center justify-center text-gray-500">
           <div className="text-center">
             <h2 className="text-2xl font-semibold mb-2">Product Not Found</h2>
@@ -55,15 +52,12 @@ const ProductDetailsPage: FC = () => {
             </button>
           </div>
         </div>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <Navbar />
-
       <main className="flex-1 container mx-auto px-4 py-8 md:py-12">
         {/* Breadcrumb */}
         <div className="text-sm text-gray-500 mb-6">
@@ -233,8 +227,6 @@ const ProductDetailsPage: FC = () => {
           </div>
         </section>
       )}
-
-      <Footer />
     </div>
   );
 };
