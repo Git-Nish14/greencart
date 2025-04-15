@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { assets } from "@/assets/assets";
@@ -7,18 +8,25 @@ import { useAppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 
 function Navbar() {
-  const [open, setOpen] = React.useState(false);
-  const { user, setUser, setShowUserLogin } = useAppContext();
+  const [open, setOpen] = useState(false);
+  const { user, setUser, setShowUserLogin, setSearchQuery, searchQuery } =
+    useAppContext();
 
   const router = useRouter();
 
-  const logout = async () => {
+  const logout = () => {
     setUser(null);
     router.push("/");
   };
 
+  useEffect(() => {
+    if (searchQuery.trim().length > 0) {
+      router.push("/products");
+    }
+  }, [searchQuery]);
+
   return (
-    <nav className="flex items-center justify-between px-6 md:px-16 lg:px-24 xl:px-32 py-4 border-b border-gray-300 bg-white relative transition-all">
+    <nav className="flex items-center justify-between px-4 sm:px-6 md:px-16 lg:px-24 xl:px-32 py-4 border-b border-gray-300 bg-white relative transition-all">
       <Link href="/">
         <Image
           onClick={() => setOpen(false)}
@@ -31,23 +39,16 @@ function Navbar() {
       </Link>
 
       {/* Desktop Menu */}
-      <div className="hidden sm:flex items-center gap-8">
+      <div className="hidden sm:flex items-center gap-6">
         <Link href="/">Home</Link>
         <Link href="/products">All products</Link>
-        {user && (
-          <Link
-            href="/my-products"
-            onClick={() => setOpen(false)}
-            className="block"
-          >
-            My Products
-          </Link>
-        )}
+        {user && <Link href="/my-products">My Products</Link>}
         <Link href="/contact">Contact</Link>
         <Link href="/about">About</Link>
 
         <div className="hidden lg:flex items-center text-sm gap-2 border border-gray-300 px-3 rounded-full">
           <input
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="py-1.5 w-full bg-transparent outline-none placeholder-gray-500"
             type="text"
             placeholder="Search products"
@@ -55,25 +56,24 @@ function Navbar() {
           <Image src={assets.search_icon} alt="search" width={20} height={20} />
         </div>
 
-        <div className="relative cursor-pointer">
-          <Link href="/cart" className="relative">
+        <div className="relative">
+          <Link href="/cart">
             <Image
               src={assets.nav_cart_icon}
               alt="cart"
               width={20}
               height={20}
             />
-            <button className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full">
+            <span className="absolute -top-2 -right-3 text-xs text-white bg-primary w-[18px] h-[18px] rounded-full flex items-center justify-center">
               3
-            </button>
+            </span>
           </Link>
         </div>
 
-        {/* Conditional Login/Logout Button */}
         {!user ? (
           <button
             onClick={() => setShowUserLogin(true)}
-            className="cursor-pointer px-8 py-2 bg-primary hover:bg-primary-dull transition text-white rounded-full"
+            className="px-6 py-2 bg-primary hover:bg-primary-dull transition text-white rounded-full"
           >
             Login
           </button>
@@ -85,16 +85,16 @@ function Navbar() {
               width={50}
               height={50}
             />
-            <ul className="hidden group-hover:block absolute top-10 right-0 bg-white shadow border border-gray-200 py-2.5 w-30 rounded-md text-sm z-40">
+            <ul className="hidden group-hover:block absolute top-12 right-0 bg-white shadow border border-gray-200 py-2.5 w-36 rounded-md text-sm z-40">
               <Link
                 href="/my-orders"
-                className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
+                className="block px-3 py-2 hover:bg-primary/10"
               >
                 My Orders
               </Link>
               <li
                 onClick={logout}
-                className="p-1.5 pl-3 hover:bg-primary/10 cursor-pointer"
+                className="block px-3 py-2 hover:bg-primary/10 cursor-pointer"
               >
                 Logout
               </li>
@@ -103,17 +103,14 @@ function Navbar() {
         )}
       </div>
 
-      {/* Mobile Menu */}
-      <button
-        onClick={() => setOpen(!open)}
-        aria-label="Menu"
-        className="sm:hidden"
-      >
+      {/* Mobile Hamburger Icon */}
+      <button onClick={() => setOpen(!open)} className="sm:hidden">
         <Image src={assets.menu_icon} alt="menu" width={20} height={20} />
       </button>
 
+      {/* Mobile Menu */}
       {open && (
-        <div className="absolute top-[60px] left-0 w-full bg-white shadow-md py-4 flex-col items-start gap-2 px-5 text-sm md:hidden">
+        <div className="absolute top-[60px] left-0 w-full bg-white shadow-md py-4 flex flex-col items-start gap-4 px-5 text-sm sm:hidden z-50">
           <Link href="/" onClick={() => setOpen(false)} className="block">
             Home
           </Link>
@@ -144,21 +141,42 @@ function Navbar() {
             Contact
           </Link>
 
-          {/* Conditional Login/Logout Button in Mobile Menu */}
+          {/* Search Bar in Mobile Menu */}
+          <div className="flex w-full items-center gap-2 border border-gray-300 px-3 py-1.5 rounded-full">
+            <input
+              onChange={(e) => {
+                setOpen(false);
+                setSearchQuery(e.target.value);
+              }}
+              className="w-full bg-transparent outline-none placeholder-gray-500 text-sm"
+              type="text"
+              placeholder="Search products"
+            />
+            <Image
+              src={assets.search_icon}
+              alt="search"
+              width={20}
+              height={20}
+            />
+          </div>
+
           {!user ? (
             <button
               onClick={() => {
                 setOpen(false);
                 setShowUserLogin(true);
               }}
-              className="cursor-pointer px-6 py-2 mt-2 bg-primary hover:bg-primary-dull transition text-white rounded-full text-sm"
+              className="px-6 py-2 mt-2 bg-primary hover:bg-primary-dull transition text-white rounded-full text-sm"
             >
               Login
             </button>
           ) : (
             <button
-              onClick={logout}
-              className="cursor-pointer px-6 py-2 mt-2 bg-primary hover:bg-primary-dull transition text-white rounded-full text-sm"
+              onClick={() => {
+                setOpen(false);
+                logout();
+              }}
+              className="px-6 py-2 mt-2 bg-primary hover:bg-primary-dull transition text-white rounded-full text-sm"
             >
               Logout
             </button>

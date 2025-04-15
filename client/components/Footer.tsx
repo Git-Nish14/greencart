@@ -31,7 +31,7 @@ const Footer: React.FC = () => {
   return (
     <footer
       ref={footerRef}
-      className="relative px-6 md:px-16 lg:px-24 xl:px-32 pt-10 pb-6 w-full bg-white text-gray-600"
+      className="relative px-6 md:px-16 lg:px-24 xl:px-32 pt-10 pb-6 w-full bg-green-50 text-gray-600"
     >
       {/* Top Section */}
       <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-10 border-b border-gray-300 pb-8">

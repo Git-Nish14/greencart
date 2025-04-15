@@ -27,6 +27,8 @@ interface AppContextType {
   removeFromCart: (itemId: string) => void;
   updateCartItemQuantity: (itemId: string, quantity: number) => void;
   cartItems: CartItemsType;
+  searchQuery: string;
+  setSearchQuery: (query: string) => void;
 }
 
 const defaultContext: AppContextType = {
@@ -42,6 +44,8 @@ const defaultContext: AppContextType = {
   removeFromCart: () => {},
   updateCartItemQuantity: () => {},
   cartItems: {},
+  searchQuery: "",
+  setSearchQuery: () => {},
 };
 
 export const AppContext = createContext<AppContextType>(defaultContext);
@@ -53,6 +57,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [showUserLogin, setShowUserLogin] = useState<boolean>(false);
   const [products, setProducts] = useState<typeof dummyProducts>([]);
   const [cartItems, setCartItems] = useState<CartItemsType>({});
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   const fetchProducts = async () => {
     setProducts(dummyProducts);
@@ -103,6 +108,8 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     removeFromCart,
     updateCartItemQuantity,
     cartItems,
+    searchQuery,
+    setSearchQuery,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

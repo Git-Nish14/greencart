@@ -6,7 +6,7 @@ export async function POST(req: Request) {
 
   try {
     const transporter = nodemailer.createTransport({
-      service: "gmail", // or use smtp.ethereal.email for testing
+      service: "gmail",
       auth: {
         user: process.env.MAIL_USER,
         pass: process.env.MAIL_PASS,
