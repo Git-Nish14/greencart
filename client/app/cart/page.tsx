@@ -235,7 +235,7 @@ export default function CartPage() {
                     ))}
                     <p
                       onClick={() => {
-                        router.push("/add-address");
+                        router.push("/profile/add-address");
                         window.scrollTo(0, 0);
                       }}
                       className="text-primary text-center cursor-pointer p-3 hover:bg-indigo-50 font-medium"

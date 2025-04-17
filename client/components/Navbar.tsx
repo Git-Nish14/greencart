@@ -94,10 +94,16 @@ function Navbar() {
             />
             <ul className="hidden group-hover:block absolute top-12 right-0 bg-white shadow border border-gray-200 py-2.5 w-36 rounded-md text-sm z-40">
               <Link
-                href="/my-orders"
+                href="/cart/my-orders"
                 className="block px-3 py-2 hover:bg-primary/10"
               >
                 My Orders
+              </Link>
+              <Link
+                href="/profile"
+                className="block px-3 py-2 hover:bg-primary/10"
+              >
+                Profile
               </Link>
               <li
                 onClick={logout}
@@ -145,11 +151,11 @@ function Navbar() {
           </Link>
           {user && (
             <Link
-              href="/my-products"
+              href="/cart/my-orders"
               onClick={() => setOpen(false)}
               className="block"
             >
-              My Products
+              My Orders
             </Link>
           )}
           <Link href="/about" onClick={() => setOpen(false)} className="block">
