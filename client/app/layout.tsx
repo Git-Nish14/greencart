@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { AppContextProvider } from "@/context/AppContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import LayoutProvider from "@/components/LayoutProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +36,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AppContextProvider>
-          <Navbar />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
+          <LayoutProvider>{children}</LayoutProvider>
           <Toaster position="top-right" reverseOrder={false} />
         </AppContextProvider>
       </body>
