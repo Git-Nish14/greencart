@@ -1,12 +1,10 @@
-"use client";
-import SellerLogin from "@/components/SellerLogin";
-import { useAppContext } from "@/context/AppContext";
 import React from "react";
 
-function Page() {
-  const { isSeller } = useAppContext();
-
-  return <div>{!isSeller && <SellerLogin />}</div>;
+export default function SellerHomePage() {
+  return (
+    <div>
+      <h1 className="text-2xl font-bold">Welcome to Seller Dashboard</h1>
+      <p>Add your products here!</p>
+    </div>
+  );
 }
-
-export default Page;
