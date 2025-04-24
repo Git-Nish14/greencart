@@ -95,3 +95,41 @@ export const login = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: "Server Error" });
   }
 };
+
+// check auth : /api/user/is-auth
+export const isAuth = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).userId;
+
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const user = await User.findById(userId).select("-password");
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
+    }
+
+    return res.json({ success: true, user });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+//Logout User : /api/user/logout
+export const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "strict",
+    });
+    return res.json({ success: true, message: "Logged Out" });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
