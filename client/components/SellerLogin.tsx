@@ -3,16 +3,29 @@
 import { useAppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const SellerLogin: React.FC = () => {
-  const { isSeller, setIsSeller } = useAppContext();
+  const { isSeller, setIsSeller, axios } = useAppContext();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setIsSeller(true);
+    try {
+      event.preventDefault();
+      const { data } = await axios.post("/api/seller/login", {
+        email,
+        password,
+      });
+      if (data.success) {
+        setIsSeller(true);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error("Email or Password is Invalid");
+    }
   };
 
   useEffect(() => {

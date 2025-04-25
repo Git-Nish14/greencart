@@ -9,6 +9,13 @@ import {
   ReactNode,
 } from "react";
 import toast from "react-hot-toast";
+import axiosLib from "axios";
+
+// Setup axios defaults
+const axios = axiosLib.create({
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL, // ✅ Correct environment variable (NEXT_PUBLIC_ needed in Next.js)
+  withCredentials: true,
+});
 
 type CartItemsType = {
   [key: string]: number;
@@ -31,8 +38,10 @@ interface AppContextType {
   setSearchQuery: (query: string) => void;
   getCartCount: () => number;
   getCartAmount: () => number;
+  axios: typeof axios;
 }
 
+// Default context (fallback)
 const defaultContext: AppContextType = {
   user: null,
   setUser: () => {},
@@ -50,6 +59,7 @@ const defaultContext: AppContextType = {
   setSearchQuery: () => {},
   getCartCount: () => 0,
   getCartAmount: () => 0,
+  axios, // ✅ include axios here too
 };
 
 export const AppContext = createContext<AppContextType>(defaultContext);
@@ -63,61 +73,77 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   const [cartItems, setCartItems] = useState<CartItemsType>({});
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  //fetch seller status
+  const fetchSeller = async () => {
+    try {
+      const { data } = await axios.get("/api/seller/is-auth");
+      if (data.success) {
+        setIsSeller(true);
+      } else {
+        setIsSeller(false);
+      }
+    } catch (error) {
+      setIsSeller(false);
+    }
+  };
+
   const fetchProducts = async () => {
+    // Later you can fetch from your backend here
     setProducts(dummyProducts);
   };
 
   const addToCart = (itemId: string) => {
-    const cartData = { ...cartItems };
-    cartData[itemId] = (cartData[itemId] || 0) + 1;
-    setCartItems(cartData);
+    setCartItems((prev) => {
+      const updatedCart = { ...prev };
+      updatedCart[itemId] = (updatedCart[itemId] || 0) + 1;
+      return updatedCart;
+    });
     toast.success("Product added to cart successfully!");
   };
 
   const updateCartItemQuantity = (itemId: string, quantity: number) => {
-    const cartData = { ...cartItems };
-    if (cartData[itemId]) {
-      cartData[itemId] = quantity;
-      setCartItems(cartData);
-      toast.success("Cart updated");
-    }
+    setCartItems((prev) => {
+      const updatedCart = { ...prev };
+      if (updatedCart[itemId]) {
+        updatedCart[itemId] = quantity;
+      }
+      return updatedCart;
+    });
+    toast.success("Cart updated");
   };
 
   const removeFromCart = (itemId: string) => {
-    const cartData = { ...cartItems };
-    if (cartData[itemId]) {
-      cartData[itemId] -= 1;
-      if (cartData[itemId] <= 0) {
-        delete cartData[itemId];
+    setCartItems((prev) => {
+      const updatedCart = { ...prev };
+      if (updatedCart[itemId]) {
+        updatedCart[itemId] -= 1;
+        if (updatedCart[itemId] <= 0) {
+          delete updatedCart[itemId];
+        }
       }
-      setCartItems(cartData);
-      toast.success("Product removed from cart successfully!");
-    }
+      return updatedCart;
+    });
+    toast.success("Product removed from cart successfully!");
   };
 
-  //get cart item count
   const getCartCount = () => {
-    let totalCount = 0;
-    for (const item in cartItems) {
-      totalCount += cartItems[item];
-    }
-    return totalCount;
+    return Object.values(cartItems).reduce((acc, qty) => acc + qty, 0);
   };
 
-  //Get cart item total price
   const getCartAmount = () => {
-    let totalPrice = 0;
-    for (const item in cartItems) {
-      const itemInfo = products.find((product) => product._id === item);
-      if (itemInfo && cartItems[item] > 0) {
-        totalPrice += itemInfo.price * cartItems[item];
+    let total = 0;
+    for (const id in cartItems) {
+      const product = products.find((p) => p._id === id);
+      if (product) {
+        total += product.price * cartItems[id];
       }
     }
-    return Math.floor(totalPrice * 100) / 100;
+    return Math.floor(total * 100) / 100; // Round to 2 decimal
   };
 
   useEffect(() => {
     fetchProducts();
+    fetchSeller();
   }, []);
 
   const value: AppContextType = {
@@ -137,6 +163,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     setSearchQuery,
     getCartCount,
     getCartAmount,
+    axios,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
