@@ -39,6 +39,7 @@ interface AppContextType {
   getCartCount: () => number;
   getCartAmount: () => number;
   axios: typeof axios;
+  fetchProducts: () => Promise<void>;
 }
 
 // Default context (fallback)
@@ -59,7 +60,8 @@ const defaultContext: AppContextType = {
   setSearchQuery: () => {},
   getCartCount: () => 0,
   getCartAmount: () => 0,
-  axios, // ✅ include axios here too
+  axios,
+  fetchProducts: async () => {}, // no-op default
 };
 
 export const AppContext = createContext<AppContextType>(defaultContext);
@@ -88,8 +90,16 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const fetchProducts = async () => {
-    // Later you can fetch from your backend here
-    setProducts(dummyProducts);
+    try {
+      const { data } = await axios.get("/api/product/list");
+      if (data.success) {
+        setProducts(data.products);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   const addToCart = (itemId: string) => {
@@ -164,6 +174,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     getCartCount,
     getCartAmount,
     axios,
+    fetchProducts,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

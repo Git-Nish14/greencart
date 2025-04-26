@@ -1,85 +1,128 @@
 "use client";
 
-import { assets, categories } from "@/assets/assets";
 import Image from "next/image";
-import React, { useState, FormEvent, useContext } from "react";
+import React, { useState, useEffect, FormEvent, useContext } from "react";
 import {
   Image as ImageIcon,
   X,
   Plus,
-  DollarSign,
   Tag,
   FileText,
-  CheckCircle,
   Loader2,
   ArrowRight,
 } from "lucide-react";
+import { categories } from "@/assets/assets";
+import { AppContext, useAppContext } from "@/context/AppContext";
+import toast from "react-hot-toast";
 
-// Assuming you have an AppContext with currency
-import { AppContext } from "@/context/AppContext";
+interface ProductData {
+  name: string;
+  description: string[];
+  category: string;
+  price: string;
+  offerPrice: string;
+}
+
+const MAX_IMAGES = 4;
 
 const AddProduct: React.FC = () => {
-  const { currency } = useContext(AppContext) || { currency: "$" };
-  const [files, setFiles] = useState<File[]>([]);
-  const [fileUrls, setFileUrls] = useState<string[]>([]);
+  const { currency } = useContext(AppContext) ?? { currency: "$" };
+  const { axios } = useAppContext();
+  const [files, setFiles] = useState<Array<File | null>>(
+    Array(MAX_IMAGES).fill(null)
+  );
+  const [fileUrls, setFileUrls] = useState<Array<string | null>>(
+    Array(MAX_IMAGES).fill(null)
+  );
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("");
   const [price, setPrice] = useState("");
   const [offerPrice, setOfferPrice] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  useEffect(() => {
+    return () => {
+      fileUrls.forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+    };
+  }, [fileUrls]);
 
   const handleImageChange = (index: number, file: File | null) => {
     if (!file) return;
+    if (fileUrls[index]) URL.revokeObjectURL(fileUrls[index]!);
 
-    // Create a copy of the arrays
-    const updatedFiles = [...files];
-    const updatedFileUrls = [...fileUrls];
+    const newFiles = [...files];
+    const newUrls = [...fileUrls];
 
-    // Update file and create URL
-    updatedFiles[index] = file;
-    updatedFileUrls[index] = URL.createObjectURL(file);
+    newFiles[index] = file;
+    newUrls[index] = URL.createObjectURL(file);
 
-    // Update state
-    setFiles(updatedFiles);
-    setFileUrls(updatedFileUrls);
+    setFiles(newFiles);
+    setFileUrls(newUrls);
   };
 
   const removeImage = (index: number) => {
-    // Create copies of the arrays
-    const updatedFiles = [...files];
-    const updatedFileUrls = [...fileUrls];
+    const newFiles = [...files];
+    const newUrls = [...fileUrls];
 
-    // Remove file and URL
-    if (updatedFileUrls[index]) {
-      URL.revokeObjectURL(updatedFileUrls[index]);
-    }
+    if (newUrls[index]) URL.revokeObjectURL(newUrls[index]!);
 
-    updatedFiles[index] = undefined as any;
-    updatedFileUrls[index] = undefined as any;
+    newFiles[index] = null;
+    newUrls[index] = null;
 
-    // Update state
-    setFiles(updatedFiles);
-    setFileUrls(updatedFileUrls);
+    setFiles(newFiles);
+    setFileUrls(newUrls);
   };
 
   const onSubmitHandler = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSubmitting(true);
 
-    // Simulate submission
-    setTimeout(() => {
+    try {
+      const productData: ProductData = {
+        name,
+        description: description.split("\n"),
+        category,
+        price,
+        offerPrice,
+      };
+
+      const formData = new FormData();
+      formData.append("productData", JSON.stringify(productData));
+
+      files.forEach((file) => {
+        if (file) {
+          formData.append("images", file);
+        }
+      });
+
+      const { data } = await axios.post("/api/product/add", formData);
+
+      if (data.success) {
+        toast.success(data.message);
+        setName("");
+        setDescription("");
+        setCategory("");
+        setPrice("");
+        setOfferPrice("");
+        setFiles(Array(MAX_IMAGES).fill(null));
+        setFileUrls(Array(MAX_IMAGES).fill(null));
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    } finally {
       setSubmitting(false);
-      // Here would be your actual submission logic
-      alert("Product added successfully!");
-    }, 1500);
+    }
   };
 
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-5xl mx-auto p-4">
         <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          {/* Header */}
           <div className="bg-emerald-500 text-white p-5">
             <div className="flex justify-between items-center">
               <h1 className="text-xl font-semibold">Add New Product</h1>
@@ -103,54 +146,50 @@ const AddProduct: React.FC = () => {
               </p>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {Array(4)
-                  .fill(null)
-                  .map((_, index) => (
-                    <div
-                      key={index}
-                      className="relative border border-dashed rounded-lg overflow-hidden aspect-square"
-                    >
-                      {fileUrls[index] ? (
-                        <>
-                          <Image
-                            src={fileUrls[index]}
-                            alt={`Product image ${index + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeImage(index)}
-                            className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
-                          >
-                            <X size={16} />
-                          </button>
-                        </>
-                      ) : (
-                        <label
-                          htmlFor={`image${index}`}
-                          className="flex flex-col items-center justify-center h-full cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                {fileUrls.map((url, index) => (
+                  <div
+                    key={index}
+                    className="relative border border-dashed rounded-lg overflow-hidden aspect-square"
+                  >
+                    {url ? (
+                      <>
+                        <Image
+                          src={url}
+                          alt={`Product image ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImage(index)}
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
                         >
-                          <input
-                            id={`image${index}`}
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            onChange={(e) =>
-                              handleImageChange(
-                                index,
-                                e.target.files?.[0] || null
-                              )
-                            }
-                          />
-                          <Plus size={24} className="text-gray-400 mb-1" />
-                          <span className="text-xs text-gray-500">
-                            Add image
-                          </span>
-                        </label>
-                      )}
-                    </div>
-                  ))}
+                          <X size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      <label
+                        htmlFor={`image${index}`}
+                        className="flex flex-col items-center justify-center h-full cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        <input
+                          id={`image${index}`}
+                          type="file"
+                          accept="image/*"
+                          hidden
+                          onChange={(e) =>
+                            handleImageChange(
+                              index,
+                              e.target.files?.[0] ?? null
+                            )
+                          }
+                        />
+                        <Plus size={24} className="text-gray-400 mb-1" />
+                        <span className="text-xs text-gray-500">Add image</span>
+                      </label>
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -163,8 +202,7 @@ const AddProduct: React.FC = () => {
                   htmlFor="product-name"
                   className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700"
                 >
-                  <Tag size={16} className="text-emerald-500" />
-                  Product Name
+                  <Tag size={16} className="text-emerald-500" /> Product Name
                 </label>
                 <input
                   id="product-name"
@@ -182,8 +220,8 @@ const AddProduct: React.FC = () => {
                   htmlFor="product-description"
                   className="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700"
                 >
-                  <FileText size={16} className="text-emerald-500" />
-                  Product Description
+                  <FileText size={16} className="text-emerald-500" /> Product
+                  Description
                 </label>
                 <textarea
                   id="product-description"
@@ -296,13 +334,17 @@ const AddProduct: React.FC = () => {
               >
                 {submitting ? (
                   <>
-                    <Loader2 size={18} className="animate-spin" />
-                    <span>Processing...</span>
+                    {" "}
+                    <Loader2
+                      size={18}
+                      className="animate-spin"
+                    /> Processing...{" "}
                   </>
                 ) : (
                   <>
+                    {" "}
                     <span>Add Product</span>
-                    <ArrowRight size={18} />
+                    <ArrowRight size={18} />{" "}
                   </>
                 )}
               </button>

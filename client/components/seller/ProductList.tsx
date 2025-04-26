@@ -11,9 +11,10 @@ import {
   Edit,
   Trash2,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 function ProductList() {
-  const { products, currency } = useAppContext();
+  const { products, currency, axios, fetchProducts } = useAppContext();
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const itemsPerPage = 5;
@@ -38,11 +39,21 @@ function ProductList() {
     setCurrentPage(pageNumber);
   };
 
-  const handleStockToggle = (productId: string, currentStatus: boolean) => {
-    // Here you would update the product's stock status in your backend
-    console.log(
-      `Toggled stock status for product ${productId} to ${!currentStatus}`
-    );
+  const handleStockToggle = async (
+    id: string,
+    inStock: boolean
+  ): Promise<void> => {
+    try {
+      const { data } = await axios.post("/api/product/stock", { id, inStock });
+      if (data.success) {
+        fetchProducts();
+        toast.success(data.message);
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   return (
@@ -170,9 +181,9 @@ function ProductList() {
                             <input
                               type="checkbox"
                               className="sr-only peer"
-                              defaultChecked={product.inStock}
+                              checked={product.inStock}
                               onChange={() =>
-                                handleStockToggle(product._id, product.inStock)
+                                handleStockToggle(product._id, !product.inStock)
                               }
                             />
                             <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-emerald-500 peer-focus:ring-2 peer-focus:ring-emerald-300 transition-colors duration-200"></div>
