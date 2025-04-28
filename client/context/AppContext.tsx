@@ -13,7 +13,7 @@ import axiosLib from "axios";
 
 // Setup axios defaults
 const axios = axiosLib.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL, // ✅ Correct environment variable (NEXT_PUBLIC_ needed in Next.js)
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
   withCredentials: true,
 });
 
@@ -61,7 +61,7 @@ const defaultContext: AppContextType = {
   getCartCount: () => 0,
   getCartAmount: () => 0,
   axios,
-  fetchProducts: async () => {}, // no-op default
+  fetchProducts: async () => {},
 };
 
 export const AppContext = createContext<AppContextType>(defaultContext);
@@ -86,6 +86,19 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (error) {
       setIsSeller(false);
+    }
+  };
+
+  //fetch user auth status , User Data and Cart Items
+  const fetchUser = async () => {
+    try {
+      const { data } = await axios.get("/api/user/is-auth");
+      if (data.success) {
+        setUser(data.user);
+        setCartItems(data.user.cartItems);
+      }
+    } catch (error: any) {
+      setUser(null);
     }
   };
 
@@ -148,12 +161,13 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
         total += product.price * cartItems[id];
       }
     }
-    return Math.floor(total * 100) / 100; // Round to 2 decimal
+    return Math.floor(total * 100) / 100;
   };
 
   useEffect(() => {
     fetchProducts();
     fetchSeller();
+    fetchUser();
   }, []);
 
   const value: AppContextType = {

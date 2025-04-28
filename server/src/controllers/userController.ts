@@ -39,7 +39,12 @@ export const register = async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        cartItems: user.cartItems,
+      },
     });
   } catch (error: any) {
     console.error("Register Error:", error.message);
@@ -88,7 +93,12 @@ export const login = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        cartItems: user.cartItems,
+      },
     });
   } catch (error: any) {
     console.error("Login Error:", error.message);

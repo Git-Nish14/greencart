@@ -3,24 +3,40 @@
 import React, { useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 function Login() {
-  const { setUser, setShowUserLogin } = useAppContext();
+  const router = useRouter();
+  const { setUser, setShowUserLogin, axios } = useAppContext();
   const [state, setState] = useState<"login" | "register">("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const onSubmitHandler = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+    try {
+      event.preventDefault();
+      const { data } = await axios.post(`/api/user/${state}`, {
+        name,
+        email,
+        password,
+      });
 
-    setUser({
-      email: email || "test@nish.dev",
-      name: name || "Nish",
-    });
-
-    toast.success(state === "register" ? "Account created!" : "Logged in!");
-    setShowUserLogin(false);
+      if (data.success) {
+        router.push("/");
+        setUser(data.user);
+        setShowUserLogin(false);
+        toast.success(state === "register" ? "Account created!" : "Logged in!");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Something went wrong";
+      toast.error(errorMessage);
+    }
   };
 
   return (
