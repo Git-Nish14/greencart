@@ -170,6 +170,27 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     fetchUser();
   }, []);
 
+  //update database cart items
+  useEffect(() => {
+    const updateCart = async () => {
+      if (!user?.id) return;
+
+      try {
+        const { data } = await axios.post("/api/cart/update", {
+          userId: user.id,
+          cartItems,
+        });
+        if (!data.success) {
+          toast.error(data.message);
+        }
+      } catch (error: any) {
+        toast.error(error.message);
+      }
+    };
+
+    updateCart();
+  }, [cartItems, user?.id]);
+
   const value: AppContextType = {
     user,
     setUser,

@@ -6,6 +6,7 @@ import Image from "next/image";
 import { assets } from "@/assets/assets";
 import { useAppContext } from "@/context/AppContext";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 function Navbar() {
   const [open, setOpen] = useState(false);
@@ -17,13 +18,24 @@ function Navbar() {
     searchQuery,
     getCartCount,
     getCartAmount,
+    axios,
   } = useAppContext();
 
   const router = useRouter();
 
-  const logout = () => {
-    setUser(null);
-    router.push("/");
+  const logout = async () => {
+    try {
+      const { data } = await axios.get("/api/user/logout");
+      if (data.success) {
+        toast.success(data.message);
+        setUser(null);
+        router.push("/");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
