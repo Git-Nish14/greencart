@@ -15,7 +15,7 @@ import { stripeWebhooks } from "./controllers/orderController";
 const app = express();
 const port = process.env.PORT || 4000;
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = ["https://greencartnish.vercel.app"];
 
 app.post("/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
 
