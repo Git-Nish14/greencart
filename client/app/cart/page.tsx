@@ -3,8 +3,23 @@
 import React, { useEffect, useState } from "react";
 import { useAppContext } from "@/context/AppContext";
 import Image from "next/image";
-import { assets, dummyAddress } from "@/assets/assets";
+import { assets } from "@/assets/assets";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+
+interface AddressType {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  street: string;
+  city: string;
+  state: string;
+  zipcode: number;
+  country: string;
+  _id: string;
+  phone: string;
+}
 
 export default function CartPage() {
   const {
@@ -14,18 +29,23 @@ export default function CartPage() {
     removeFromCart,
     getCartAmount,
     getCartCount,
+    setCartItems,
+    axios,
+    user,
   } = useAppContext();
 
   const router = useRouter();
 
   const [cartArray, setCartArray] = useState<any[]>([]);
-  const [address, setAddresses] = useState(dummyAddress);
+  const [address, setAddresses] = useState<AddressType[]>([]);
   const [showAddress, setShowAddress] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(dummyAddress[0]);
+  const [selectedAddress, setSelectedAddress] = useState<AddressType | null>(
+    null
+  );
   const [paymentOption, setPaymentOption] = useState("COD");
 
   const getCart = () => {
-    let tempArray: any[] = [];
+    const tempArray: any[] = [];
     for (const key in cartItems) {
       const product = products.find((item) => item._id === key);
       if (product) {
@@ -35,8 +55,52 @@ export default function CartPage() {
     setCartArray(tempArray);
   };
 
+  const getUserAddress = async () => {
+    try {
+      const { data } = await axios.get(`/api/address/get?userId=${user._id}`);
+
+      if (data.success) {
+        setAddresses(data.addresses);
+        if (data.addresses.length > 0) {
+          setSelectedAddress(data.addresses[0]);
+        } else {
+          toast.error("No address found");
+        }
+      } else {
+        toast.error(data.message || "Failed to fetch address");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong");
+    }
+  };
+
   const placeOrder = async () => {
-    // Order placement logic
+    try {
+      if (!selectedAddress) {
+        return toast.error("please select an address");
+      }
+
+      //place Order with COD
+      if (paymentOption === "COD") {
+        const { data } = await axios.post("/api/order/cod", {
+          userId: user._id,
+          items: cartArray.map((item) => ({
+            product: item._id,
+            quantity: item.quantity,
+          })),
+          address: selectedAddress._id,
+        });
+        if (data.success) {
+          toast.success(data.message);
+          setCartItems({});
+          router.push("/cart/my-orders");
+        } else {
+          toast.error(data.message);
+        }
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   useEffect(() => {
@@ -44,6 +108,11 @@ export default function CartPage() {
       getCart();
     }
   }, [products, cartItems]);
+
+  useEffect(() => {
+    if (!user) return;
+    getUserAddress(); // ✅ Always call inside the effect with early return
+  }, [user]);
 
   if (products.length === 0 || !cartItems) {
     return (
@@ -83,14 +152,12 @@ export default function CartPage() {
             </button>
           </div>
 
-          {/* Cart Header - visible on md and above */}
           <div className="hidden md:grid grid-cols-[3fr_1fr_1fr] text-gray-500 text-base font-medium pb-3 border-b">
             <p className="text-left">Product Details</p>
             <p className="text-center">Subtotal</p>
             <p className="text-center">Action</p>
           </div>
 
-          {/* Cart Items */}
           <div className="space-y-6 mt-4">
             {cartArray.length === 0 ? (
               <div className="text-center py-12">
@@ -201,6 +268,7 @@ export default function CartPage() {
           <hr className="border-gray-200 mb-4" />
 
           <div className="mb-6 space-y-4">
+            {/* Address */}
             <div>
               <p className="text-sm font-medium uppercase text-gray-600 mb-2">
                 Delivery Address
@@ -247,6 +315,7 @@ export default function CartPage() {
               </div>
             </div>
 
+            {/* Payment Method */}
             <div>
               <p className="text-sm font-medium uppercase text-gray-600 mb-2">
                 Payment Method
@@ -264,6 +333,7 @@ export default function CartPage() {
 
           <hr className="border-gray-200 mb-4" />
 
+          {/* Totals */}
           <div className="text-gray-600 space-y-3">
             <div className="flex justify-between">
               <span>Subtotal</span>
@@ -285,7 +355,6 @@ export default function CartPage() {
                 {(getCartAmount() * 0.02).toFixed(2)}
               </span>
             </div>
-
             <div className="flex justify-between pt-3 mt-2 border-t border-gray-200 text-lg font-medium text-gray-800">
               <span>Total:</span>
               <span>

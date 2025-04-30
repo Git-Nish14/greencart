@@ -2,7 +2,7 @@
 
 import { assets } from "@/assets/assets";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   User,
   Mail,
@@ -13,6 +13,9 @@ import {
   Hash,
   CheckCircle,
 } from "lucide-react";
+import { useAppContext } from "@/context/AppContext";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const InputField = ({
   type,
@@ -72,6 +75,8 @@ function AddAddress() {
     phone: "",
   });
 
+  const { axios, user } = useAppContext();
+  const router = useRouter();
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setAddress((prevAddress) => ({
@@ -82,7 +87,28 @@ function AddAddress() {
 
   const onSubmitHandler = async (e: React.FormEvent) => {
     e.preventDefault();
+    try {
+      const { data } = await axios.post("/api/address/add", {
+        address,
+        userId: user._id,
+      });
+
+      if (data.success) {
+        toast.success(data.message);
+        router.push("/cart");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
+
+  useEffect(() => {
+    if (!user) {
+      router.push("/cart");
+    }
+  }, []);
 
   return (
     <div className="mt-16 pb-16 max-w-6xl mx-auto px-4">

@@ -40,6 +40,7 @@ interface AppContextType {
   getCartAmount: () => number;
   axios: typeof axios;
   fetchProducts: () => Promise<void>;
+  setCartItems: React.Dispatch<React.SetStateAction<CartItemsType>>;
 }
 
 // Default context (fallback)
@@ -53,6 +54,7 @@ const defaultContext: AppContextType = {
   products: [],
   currency: "",
   addToCart: () => {},
+  setCartItems: () => {},
   removeFromCart: () => {},
   updateCartItemQuantity: () => {},
   cartItems: {},
@@ -210,6 +212,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     getCartAmount,
     axios,
     fetchProducts,
+    setCartItems,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
