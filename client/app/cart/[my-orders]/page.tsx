@@ -1,9 +1,7 @@
 "use client";
-
-import { dummyOrders } from "@/assets/assets";
-import { useAppContext } from "@/context/AppContext";
-import Image from "next/image";
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
+import { useAppContext } from "@/context/AppContext";
 import {
   Package,
   Clock,
@@ -13,31 +11,59 @@ import {
   Tag,
 } from "lucide-react";
 
-function MyOrders() {
-  const [myOrders, setMyOrders] = useState([] as typeof dummyOrders);
-  const { currency } = useAppContext();
+interface OrderProduct {
+  name: string;
+  category: string;
+  image: string[];
+  offerPrice: number;
+}
 
-  const fetchMyOrders = async () => {
-    setMyOrders(dummyOrders);
-  };
+interface OrderItem {
+  product: OrderProduct;
+  quantity: number;
+}
+
+interface Order {
+  _id: string;
+  paymentType: string;
+  createdAt: string;
+  status: string;
+  amount: number;
+  items: OrderItem[];
+}
+
+export default function MyOrders() {
+  const [myOrders, setMyOrders] = useState<Order[]>([]);
+  const { currency, axios, user } = useAppContext();
 
   useEffect(() => {
+    if (!user) return;
+    const fetchMyOrders = async () => {
+      try {
+        const { data } = await axios.get("/api/order/user", {
+          params: { userId: user._id }, // ← pass userId as query
+        });
+        if (data.success) {
+          setMyOrders(data.orders);
+        } else {
+          console.error("Could not fetch orders:", data.message);
+        }
+      } catch (err) {
+        console.error("Error fetching orders:", err);
+      }
+    };
     fetchMyOrders();
-  }, []);
+  }, [user, axios]);
 
   return (
     <div className="mt-16 pb-16 max-w-6xl mx-auto px-4">
-      {/* Header with decorative elements */}
       <div className="flex flex-col items-start mb-12 relative">
         <h1 className="text-2xl md:text-3xl font-medium uppercase text-gray-800 tracking-wide">
           My Orders
         </h1>
-        <div className="w-24 h-1 bg-primary rounded-full mt-2"></div>
-        <div className="hidden md:block absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full z-[-1]"></div>
-        <div className="hidden md:block absolute -right-8 -top-8 w-40 h-40 bg-primary/5 rounded-full z-[-1]"></div>
+        <div className="w-24 h-1 bg-primary rounded-full mt-2" />
       </div>
 
-      {/* Orders list */}
       {myOrders.length === 0 ? (
         <div className="text-center py-16 bg-gray-50 rounded-xl">
           <ShoppingBag className="mx-auto h-16 w-16 text-gray-300 mb-4" />
@@ -48,12 +74,11 @@ function MyOrders() {
         </div>
       ) : (
         <div className="space-y-8">
-          {myOrders.map((order, index) => (
+          {myOrders.map((order) => (
             <div
-              key={index}
+              key={order._id}
               className="border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
             >
-              {/* Order header */}
               <div className="bg-gray-50 p-4 md:p-6 border-b border-gray-200">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-2">
                   <div className="flex items-center">
@@ -65,7 +90,6 @@ function MyOrders() {
                       </span>
                     </span>
                   </div>
-
                   <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-6">
                     <div className="flex items-center">
                       <CreditCard className="h-4 w-4 text-gray-400 mr-2" />
@@ -73,7 +97,6 @@ function MyOrders() {
                         {order.paymentType}
                       </span>
                     </div>
-
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 text-gray-400 mr-2" />
                       <span className="text-sm text-gray-500">
@@ -86,7 +109,6 @@ function MyOrders() {
                     </div>
                   </div>
                 </div>
-
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between mt-3">
                   <div className="flex items-center mb-2 sm:mb-0">
                     <Clock className="h-4 w-4 text-gray-400 mr-2" />
@@ -117,21 +139,19 @@ function MyOrders() {
                 </div>
               </div>
 
-              {/* Order items */}
               <div className="divide-y divide-gray-100">
                 {order.items.map((item, idx) => (
                   <div key={idx} className="p-4 md:p-6">
                     <div className="flex flex-col md:flex-row md:items-center gap-4">
-                      {/* Product image */}
                       <div className="bg-primary/10 p-3 rounded-xl flex-shrink-0">
                         <Image
                           src={item.product.image[0]}
                           alt={item.product.name}
-                          className="w-16 h-16 object-contain"
+                          width={64}
+                          height={64}
+                          className="object-contain"
                         />
                       </div>
-
-                      {/* Product details */}
                       <div className="flex-grow">
                         <div className="flex flex-col md:flex-row md:items-center justify-between">
                           <div>
@@ -145,12 +165,11 @@ function MyOrders() {
                               </p>
                             </div>
                           </div>
-
                           <div className="mt-3 md:mt-0 text-right">
                             <div className="text-gray-500 text-sm mb-1">
                               Qty:{" "}
                               <span className="font-medium">
-                                {item.quantity || "1"}
+                                {item.quantity}
                               </span>
                             </div>
                             <p className="text-primary font-bold">
@@ -171,5 +190,3 @@ function MyOrders() {
     </div>
   );
 }
-
-export default MyOrders;
