@@ -67,7 +67,7 @@ CORS
 
 Author
 Nish Patel
-https://nish.techifive.com
+https://nishpatel.dev
 
 Installation
 Clone the repository
@@ -126,7 +126,7 @@ Open http://localhost:3000 to view the app in your browser.
 
 Author
 Nish Patel
-[Website](https://nish.techifive.com) | [LinkedIn](http://linkedin.com/in/nishpatel14) | [GitHub](https://github.com/Git-Nish14) | 
+[Website](https://nishpatel.dev) | [LinkedIn](http://linkedin.com/in/nishpatel14) | [GitHub](https://github.com/Git-Nish14) | 
 
 License
 This project is licensed under the MIT License.
