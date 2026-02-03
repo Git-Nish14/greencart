@@ -4,9 +4,7 @@ import Order from "../models/Order";
 import Stripe from "stripe";
 import User from "../models/User";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-03-31.basil", // ✅ Latest valid API version
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 /** Load products and return a Map<productId, productDoc> */
 async function loadProductMap(ids: string[]) {
@@ -20,7 +18,7 @@ async function loadProductMap(ids: string[]) {
 /** Compute subtotal + 2% tax */
 function computeTotalAmount(
   items: { product: string; quantity: number }[],
-  productMap: Map<string, any>
+  productMap: Map<string, any>,
 ) {
   let subtotal = 0;
   for (const item of items) {
@@ -35,7 +33,7 @@ function computeTotalAmount(
 /** Stripe line_items builder */
 function buildLineItems(
   items: { product: string; quantity: number }[],
-  productMap: Map<string, any>
+  productMap: Map<string, any>,
 ) {
   return items.map((item) => {
     const prod = productMap.get(item.product);
@@ -144,7 +142,7 @@ export const stripeWebhooks = async (req: Request, res: Response) => {
     event = stripe.webhooks.constructEvent(
       req.body,
       sig as string,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err: any) {
     console.error("⚠️  Webhook error:", err.message);

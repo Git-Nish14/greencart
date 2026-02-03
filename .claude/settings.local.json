@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(if [ -f .env ])",
+      "Bash(then echo \".env file exists\")",
+      "Bash(else echo \".env file is missing\")",
+      "Bash(fi)",
+      "Bash(if [ -f .env.example ])",
+      "Bash(then cat .env.example)",
+      "Bash(else echo \"No .env.example in server\")",
+      "Bash(npm config get prefix)",
+      "Bash(where.exe stripe)",
+      "Bash(test -f \"client/.env.local\")",
+      "Bash(npm run dev)",
+      "Bash(curl http://localhost:4000/)",
+      "Bash(curl http://localhost:4000/api/product)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(PORT=4000 npm run dev)",
+      "Bash(netstat -ano)",
+      "Bash(findstr :4000)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(curl http://localhost:4000/api/product/list)",
+      "Bash(dir /a .env*)",
+      "Bash(findstr /C:\"SUCCESS\" /C:\"ERROR: The process\")",
+      "Bash(curl -s http://localhost:4000/api/product/list)"
+    ]
+  }
+}
