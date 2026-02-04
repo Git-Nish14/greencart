@@ -231,3 +231,78 @@ export const getAllOrders = async (_req: Request, res: Response) => {
     return res.status(500).json({ success: false, message: err.message });
   }
 };
+
+/** Update order status */
+export const updateOrderStatus = async (req: Request, res: Response) => {
+  try {
+    const { orderId, status } = req.body;
+
+    if (!orderId || !status) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing orderId or status" });
+    }
+
+    const validStatuses = [
+      "Order Placed",
+      "Processing",
+      "Shipped",
+      "Out for Delivery",
+      "Delivered",
+      "Cancelled",
+    ];
+
+    if (!validStatuses.includes(status)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid status value" });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    );
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    return res.json({ success: true, message: "Order status updated", order });
+  } catch (err: any) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+/** Mark COD order as paid */
+export const markOrderPaid = async (req: Request, res: Response) => {
+  try {
+    const { orderId } = req.body;
+
+    if (!orderId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing orderId" });
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      orderId,
+      { isPaid: true },
+      { new: true }
+    );
+
+    if (!order) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Order not found" });
+    }
+
+    return res.json({ success: true, message: "Order marked as paid", order });
+  } catch (err: any) {
+    console.error(err);
+    return res.status(500).json({ success: false, message: err.message });
+  }
+};

@@ -374,7 +374,7 @@ export default function CartPage() {
               <span>Total:</span>
               <span>
                 {process.env.NEXT_PUBLIC_CURRENCY}
-                {(getCartAmount() * 0.98).toFixed(2)}
+                {(getCartAmount() + (getCartAmount() * 0.02)).toFixed(2)}
               </span>
             </div>
           </div>

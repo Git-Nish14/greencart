@@ -6,6 +6,8 @@ import {
   changeStock,
   productById,
   productList,
+  editProduct,
+  deleteProduct,
 } from "../controllers/productController";
 
 const productRouter = express.Router();
@@ -19,5 +21,11 @@ productRouter.get("/:id", productById);
 
 // Seller Protected: Update stock
 productRouter.put("/stock", authSeller, changeStock);
+
+// Seller Protected: Edit product
+productRouter.put("/edit/:id", authSeller, upload.array("images"), editProduct);
+
+// Seller Protected: Delete product
+productRouter.delete("/delete/:id", authSeller, deleteProduct);
 
 export default productRouter;

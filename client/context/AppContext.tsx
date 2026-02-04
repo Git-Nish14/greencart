@@ -14,6 +14,7 @@ import axiosLib from "axios";
 // Setup axios defaults
 const axios = axiosLib.create({
   baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
+  withCredentials: true,
 });
 
 type CartItemsType = {
@@ -159,7 +160,7 @@ export const AppContextProvider = ({ children }: { children: ReactNode }) => {
     for (const id in cartItems) {
       const product = products.find((p) => p._id === id);
       if (product) {
-        total += product.price * cartItems[id];
+        total += product.offerPrice * cartItems[id];
       }
     }
     return Math.floor(total * 100) / 100;

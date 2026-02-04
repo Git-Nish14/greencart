@@ -86,3 +86,73 @@ export const changeStock = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// ------------------ Edit Product ------------------
+// PUT /api/product/edit/:id
+export const editProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const productData = JSON.parse(req.body.productData);
+    const images = Array.isArray(req.files) ? req.files : [];
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required" });
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    // If new images are uploaded, upload to cloudinary and update
+    let imagesURL = product.image;
+    if (images.length > 0) {
+      imagesURL = await Promise.all(
+        images.map(async (item: any) => {
+          const result = await cloudinary.uploader.upload(item.path, {
+            resource_type: "image",
+          });
+          return result.secure_url;
+        })
+      );
+    }
+
+    await Product.findByIdAndUpdate(id, { ...productData, image: imagesURL });
+
+    res.status(200).json({ success: true, message: "Product Updated" });
+  } catch (error: any) {
+    console.error("Edit Product Error:", error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ------------------ Delete Product ------------------
+// DELETE /api/product/delete/:id
+export const deleteProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product ID is required" });
+    }
+
+    const product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    res.status(200).json({ success: true, message: "Product Deleted" });
+  } catch (error: any) {
+    console.error("Delete Product Error:", error.message);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

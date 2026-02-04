@@ -1,5 +1,6 @@
 import express from "express";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import connectDB from "./config/db";
 import "dotenv/config";
 import userRouter from "./routes/userRoute";
@@ -19,6 +20,12 @@ app.post("/stripe", express.raw({ type: "application/json" }), stripeWebhooks);
 // Middleware configuration
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || "http://localhost:3000",
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 app.get("/", (req, res) => {
   res.send("API is Working");
